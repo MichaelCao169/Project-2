@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Company = require('../models/Company');
-const RefreshToken = require('../models/RefreshToken'); // Thêm dòng này
+const RefreshToken = require('../models/RefreshToken'); 
 
 // Tạo access token
 const createAccessToken = (user) => {
@@ -15,6 +15,7 @@ const createRefreshToken = async (user) => {
   await new RefreshToken({ token, userId: user._id }).save();
   return token;
 };
+
 
 // Đăng ký User
 const registerUser = async (req, res) => {

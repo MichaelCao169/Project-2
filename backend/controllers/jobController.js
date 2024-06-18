@@ -1,13 +1,29 @@
 const Job = require('../models/Job');
+const Company = require('../models/Company');
 
 // Get all jobs
 const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().populate('company', 'companyName email companyLogo '); 
+    const jobs = await Job.find().populate('company', 'companyName email companyLogo');
     res.json(jobs);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error fetching jobs', error: err.message });
+  }
+};
+
+// Get a job by ID
+const getJobById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const job = await Job.findById(id).populate('company', 'companyName email companyLogo');
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+    res.json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching job', error: err.message });
   }
 };
 
@@ -40,7 +56,7 @@ const createJob = async (req, res) => {
       description,
       applicationDeadline,
       skills,
-      company: req.user.id 
+      company: req.user.id,  // Assuming req.user.id is the company ID
     });
 
     await job.save();
@@ -131,11 +147,30 @@ const getApplicants = async (req, res) => {
   }
 };
 
+// Get jobs by user email
+const getJobsByEmail = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const company = await Company.findOne({ email });
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    const jobs = await Job.find({ company: company._id });
+    res.json(jobs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching jobs', error: err.message });
+  }
+};
+
 module.exports = {
   getJobs,
+  getJobById,
   createJob,
   updateJob,
   deleteJob,
   applyJob,
   getApplicants,
+  getJobsByEmail,
 };
